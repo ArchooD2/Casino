@@ -1,14 +1,11 @@
-# Import the random and math module
-from asciicards import show_card, show_hand, create_deck
+from asciicards.asciicards import show_card, show_hand, create_deck
 import math
 import os
-#Define clear command
+
 def cls():
     os.system("cls")
 
-
 def get_score(hand):
-    """Return the total value of a given hand"""
     score = 0
     num_aces = 0
     for card in hand:
@@ -24,7 +21,6 @@ def get_score(hand):
 
 def play_game():
     os.system("color 2")
-    """Play a game of blackjack"""
     print("Welcome to Blackjack with ASCII Art Cards!")
     deck = create_deck()
     player_chips = 100
@@ -66,12 +62,26 @@ def play_game():
                 break
             choice = input("Hit or stand? ")
             if choice.lower() == "hit":
-                player_hand.append(deck.pop())
-                print(f"\nDealer's Hand:\n{show_card(dealer_hand[0])}\n\nYour Hand:\n{show_hand(player_hand)}\nYour Hand's Value:{get_score(player_hand)}")
+                # Try to deal with IndexError
+                try:
+                    player_hand.append(deck.pop())
+                    print(f"\nDealer's Hand:\n{show_card(dealer_hand[0])}\n\nYour Hand:\n{show_hand(player_hand)}\n\nYour Hand's Value:{get_score(player_hand)}")
+                except IndexError:
+                    print("Error: Deck is empty. Creating a new deck.")
+                    deck = create_deck()
+                    player_hand.append(deck.pop())
+                    break
             else:
-                while dealer_score < 17:
-                    dealer_hand.append(deck.pop())
-                    dealer_score = get_score(dealer_hand)
+                while dealer_score < 17 or (dealer_score >= 17 and any(card["Value"] == "11" for card in dealer_hand)) or (dealer_score == 21 and any(card["Rank"] == "A" for card in dealer_hand) and any(card["Value"] == "10" for card in dealer_hand) and len(dealer_hand) == 2): #some bullshit
+                    # Try to deal with IndexError
+                    try:
+                        dealer_hand.append(deck.pop())
+                        dealer_score = get_score(dealer_hand)
+                    except IndexError:
+                        print("Error: Deck is empty. Creating a new deck.")
+                        deck = create_deck()
+                        player_hand.append(deck.pop())
+                        break
                 print(f"\nDealer's Hand:\n{show_hand(dealer_hand)}\nDealer's Hand Value:\n{get_score(dealer_hand)}")
                 if player_score == 21 and len(player_hand) == 2:
                     if dealer_score == 21 and len(dealer_hand) == 2:
@@ -89,6 +99,7 @@ def play_game():
                     print("It's a push!")
                 print(f"You now have {player_chips} Copper.\n")
                 break
+
 cls()
 play_game()
 os.system("color 7")
