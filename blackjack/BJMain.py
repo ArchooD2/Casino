@@ -1,4 +1,4 @@
-from asciicards.asciicards import show_card, show_hand, create_deck
+from asciicards import show_card, show_hand, create_deck
 import math
 import os
 
@@ -19,10 +19,10 @@ def get_score(hand):
         num_aces -= 1
     return score
 
-def play_game():
+def play_bj(chips=0):
     os.system("color 2")
     print("Welcome to Blackjack with ASCII Art Cards!")
-    player_chips = 100
+    player_chips = chips if chips else 100
     while True:
         print(f"You have {player_chips} Copper.")
         if player_chips == 0:
@@ -98,5 +98,5 @@ def play_game():
                 break
 
 cls()
-play_game()
+play_bj()
 os.system("color 7")

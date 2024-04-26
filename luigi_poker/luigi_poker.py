@@ -1,4 +1,4 @@
-from asciicards.asciicards import show_hand, create_deck
+from asciicards import show_hand, create_deck
 def evaluate_hand(hand):
     """Evaluate the value of a poker hand"""
     values = {'A': 14, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'J': 11, 'Q': 12, 'K': 13}
@@ -52,11 +52,11 @@ def compare_hands(player_hand, opponent_hand):
     print("Opponent's hand:", show_hand(opponent_hand), "Value:", opponent_hand_value)
     
     if player_hand_value > opponent_hand_value:
-        print("Congratulations! You win!")
+        return "W"
     elif player_hand_value < opponent_hand_value:
-        print("Sorry, you lose. Better luck next time.")
+        return "L"
     else:
-        print("It's a tie!")
+        return "T"
 
 def discard_phase(player_hand, deck):
     """Allow player to discard and replace cards"""
@@ -70,12 +70,13 @@ def discard_phase(player_hand, deck):
     return player_hand, deck
 
 # Main game loop
-def play_luigi_poker():
+def play_luigi_poker(chips=0):
+    print("Welcome to Luigi Poker!")
+
+    player_chpis = chips if chips else 100
     deck = create_deck()
     player_hand = [deck.pop(0) for _ in range(5)]
     opponent_hand = [deck.pop(0) for _ in range(5)]
-
-    print("Welcome to Luigi Poker!")
 
     # Discard phase
     player_hand, deck = discard_phase(player_hand, deck)
