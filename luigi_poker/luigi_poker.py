@@ -95,4 +95,5 @@ def play_luigi_poker(chips=0):
     compare_hands(player_hand, opponent_hand)
 
 # Play the game
-play_luigi_poker()
+if __name__ == "__main__":
+    play_luigi_poker()

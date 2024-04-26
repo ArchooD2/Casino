@@ -96,7 +96,7 @@ def play_bj(chips=0):
                     print("It's a push!")
                 print(f"You now have {player_chips} Copper.\n")
                 break
-
-cls()
-play_bj()
-os.system("color 7")
+if __name__ == "__main__":
+    cls()
+    play_bj()
+    os.system("color 7")
