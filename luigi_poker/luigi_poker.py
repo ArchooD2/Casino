@@ -1,4 +1,6 @@
 from asciicards import show_hand, create_deck
+from itertools import combinations
+import random
 def evaluate_hand(hand):
     """Evaluate the value of a poker hand"""
     values = {'A': 14, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'J': 11, 'Q': 12, 'K': 13}
@@ -58,6 +60,77 @@ def compare_hands(player_hand, opponent_hand):
     else:
         return "T"
 
+def sophisticated_cpu_discard_phase(player_hand, deck):
+    """CPU discards and replaces cards based on a sophisticated strategy"""
+    print("CPU's hand:")
+    print(show_hand(player_hand))
+
+    # Evaluate the current hand
+    hand_value = evaluate_hand(player_hand)
+
+    # Determine which cards to keep and which to discard based on hand value
+    if hand_value >= 600:  # If flush or better, keep the hand
+        print("CPU decides to keep the hand.")
+        return player_hand, deck
+    
+    # If not flush or better, consider discarding and replacing cards
+    discard_indices = []
+    for i, card in enumerate(player_hand):
+        # If the card contributes minimally to the hand value, consider discarding it
+        if evaluate_hand(player_hand[:i] + player_hand[i+1:]) < hand_value:
+            discard_indices.append(i)
+
+    # If no cards were found to discard, keep the hand
+    if not discard_indices:
+        print("CPU decides to keep the hand.")
+        return player_hand, deck
+
+    # Otherwise, discard the identified cards and replace them from the deck
+    print("CPU decides to discard cards at indices:", discard_indices)
+    for index in discard_indices:
+        player_hand[index] = deck.pop(0)
+
+    return player_hand, deck
+
+def luigi_cheat_discard_phase(player_hand, deck):
+    # Evaluate the current hand
+    hand_value = evaluate_hand(player_hand)
+
+    # Generate all possible subsets of card indices to discard
+    discard_combinations = []
+    for r in range(1, len(player_hand) + 1):
+        discard_combinations.extend(combinations(range(len(player_hand)), r))
+
+    # Initialize variables to track the best discard combination and resulting hand value
+    best_discard_indices = None
+    best_hand_value = hand_value
+
+    # Iterate through all discard combinations
+    for discard_indices in discard_combinations:
+        testdeck = deck.copy()
+        # Create a copy of the player's hand
+        temp_hand = player_hand[:]
+        # Discard cards at the selected indices
+        for index in discard_indices:
+            temp_hand[index] = testdeck.pop(0)
+        # Evaluate the hand value after discarding
+        new_hand_value = evaluate_hand(temp_hand)
+        # Update the best discard combination if the new hand value is higher
+        if new_hand_value > best_hand_value:
+            best_discard_indices = discard_indices
+            best_hand_value = new_hand_value
+
+    # Discard cards at the best discard indices and replace them from the deck
+    if best_discard_indices:
+        print("Luigi decides to discard cards at indices:", best_discard_indices)
+        for index in best_discard_indices:
+            player_hand[index] = deck.pop(0)
+    else:
+        print("Luigi decides not to discard any cards.")
+
+    return player_hand, deck
+
+
 def discard_phase(player_hand, deck):
     """Allow player to discard and replace cards"""
     print("Your hand:")
@@ -72,25 +145,24 @@ def discard_phase(player_hand, deck):
 # Main game loop
 def play_luigi_poker(chips=0):
     print("Welcome to Luigi Poker!")
-
+    hard = True if input("Easy or Hard? (e,E,Easy,easy/h,H,hard,Hard)").lower().startswith('h') else False
     player_chpis = chips if chips else 100
     deck = create_deck()
+    for i in range(chips):
+        random.shuffle(deck)
     player_hand = [deck.pop(0) for _ in range(5)]
     opponent_hand = [deck.pop(0) for _ in range(5)]
 
     # Discard phase
     player_hand, deck = discard_phase(player_hand, deck)
-
-    # Deal replacement cards
+    if hard == True:
+        opponent_hand, deck = luigi_cheat_discard_phase(opponent_hand, deck)
+    else:
+        opponent_hand, deck = sophisticated_cpu_discard_phase(opponent_hand, deck)
+    # Deal replacement cards if required.
     while len(player_hand) < 5:
         player_hand.append(deck.pop(0))
         opponent_hand.append(deck.pop(0))
-
-    # Show final hands
-    print("\nYour final hand:")
-    print(show_hand(player_hand))
-    print("\nOpponent's final hand:")
-    print(show_hand(opponent_hand))
 
     compare_hands(player_hand, opponent_hand)
 
