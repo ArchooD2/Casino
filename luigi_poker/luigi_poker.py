@@ -1,6 +1,8 @@
 from asciicards import show_hand, create_deck
 from itertools import combinations
-import random
+import random, os
+def cls():
+    os.system("cls")
 def evaluate_hand(hand):
     """Evaluate the value of a poker hand"""
     values = {'A': 14, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'J': 11, 'Q': 12, 'K': 13}
@@ -146,26 +148,57 @@ def discard_phase(player_hand, deck):
 def play_luigi_poker(chips=0):
     print("Welcome to Luigi Poker!")
     hard = True if input("Easy or Hard? (e,E,Easy,easy/h,H,hard,Hard)").lower().startswith('h') else False
-    player_chpis = chips if chips else 100
-    deck = create_deck()
-    for i in range(chips):
-        random.shuffle(deck)
-    player_hand = [deck.pop(0) for _ in range(5)]
-    opponent_hand = [deck.pop(0) for _ in range(5)]
+    player_chips = chips if chips else 100
+    while True:
+        print(f"You have {player_chips} Copper.")
+        if player_chips == 0:
+            input("You have no more chips! Press enter to leave.")
+            break
+        bet = 0
+        while bet == 0 or bet > player_chips:
+            try:
+                bet = int(input("Enter your bet (in Copper, increments of 5, or '0' to quit): "))
+                if bet == 0:
+                    break
+            except ValueError:
+                continue
+            if bet % 5 != 0 or bet > player_chips:
+                bet = 0
+        if bet == 0:
+            break
+        deck = create_deck()
+        for i in range(chips):
+            random.shuffle(deck)
+        player_hand = [deck.pop(0) for _ in range(5)]
+        opponent_hand = [deck.pop(0) for _ in range(5)]
 
-    # Discard phase
-    player_hand, deck = discard_phase(player_hand, deck)
-    if hard == True:
-        opponent_hand, deck = luigi_cheat_discard_phase(opponent_hand, deck)
-    else:
-        opponent_hand, deck = sophisticated_cpu_discard_phase(opponent_hand, deck)
-    # Deal replacement cards if required.
-    while len(player_hand) < 5:
-        player_hand.append(deck.pop(0))
-        opponent_hand.append(deck.pop(0))
+        # Discard phase
+        player_hand, deck = discard_phase(player_hand, deck)
+        if hard == True:
+            opponent_hand, deck = luigi_cheat_discard_phase(opponent_hand, deck)
+        else:
+            opponent_hand, deck = sophisticated_cpu_discard_phase(opponent_hand, deck)
+        # Deal replacement cards if required.
+        while len(player_hand) < 5:
+            player_hand.append(deck.pop(0))
+            opponent_hand.append(deck.pop(0))
 
-    compare_hands(player_hand, opponent_hand)
+        winner = compare_hands(player_hand, opponent_hand)
+        if winner == "W":
+            player_chips += bet
+            print("You win!")
+        elif winner == "L":
+            player_chips -= bet
+            print("You lose!")
+        else:
+            print("It's a tie!")
+        print(f"You now have {player_chips} Copper.\n")
+        input("Press enter to continue...")
+        return player_chips
 
 # Play the game
 if __name__ == "__main__":
-    play_luigi_poker()
+    chips = 100
+    while True:
+        cls()
+        chips = play_luigi_poker(chips)

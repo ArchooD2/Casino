@@ -95,6 +95,9 @@ def play_bj(chips=0):
                 else:
                     print("It's a push!")
                 print(f"You now have {player_chips} Copper.\n")
+                input("Press enter to continue...")
+                if __name__ != "__main__":
+                    return player_chips
                 break
 if __name__ == "__main__":
     cls()
