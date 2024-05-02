@@ -137,11 +137,17 @@ def discard_phase(player_hand, deck):
     """Allow player to discard and replace cards"""
     print("Your hand:")
     print(show_hand(player_hand))
+    bh = player_hand
+    bd = deck
     discard_indices = input("Enter the indices of the cards you want to discard (e.g., 1 3 4), or press Enter to keep all: ")
     if discard_indices:
         discard_indices = [int(i) - 1 for i in discard_indices.split()]
         for index in discard_indices:
-            player_hand[index] = deck.pop(0)
+            try:
+                player_hand[index] = deck.pop(0)
+            except IndexError:
+                print("Remember to put a space between the indices.")
+                player_hand, deck = discard_phase(bh, bd)
     return player_hand, deck
 
 # Main game loop

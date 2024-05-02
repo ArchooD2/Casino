@@ -33,7 +33,7 @@ def play_bj(chips=0):
             try:
                 bet = int(input("Enter your bet (in Copper, increments of 5, or '0' to quit): "))
                 if bet == 0:
-                    break
+                    return player_chips
             except ValueError:
                 continue
             if bet % 5 != 0 or bet > player_chips:
@@ -96,10 +96,10 @@ def play_bj(chips=0):
                     print("It's a push!")
                 print(f"You now have {player_chips} Copper.\n")
                 input("Press enter to continue...")
-                if __name__ != "__main__":
-                    return player_chips
                 break
 if __name__ == "__main__":
-    cls()
-    play_bj()
-    os.system("color 7")
+    chips = 100
+    while True:
+        cls()
+        chips = play_bj(chips)
+        os.system("color 7")

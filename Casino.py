@@ -25,6 +25,9 @@ if __name__ == "__main__":
     os.system("color 2")  # Setting console text color to green
     chips = 100
     while True:
+        if chips <= 0:
+            print(f"You have {chips} Copper.")
+            print("You're kicked out.")
         choice = main_menu(chips)
         if choice == "1":
             chips = play_blackjack(chips)
