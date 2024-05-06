@@ -10,8 +10,8 @@ def play_blackjack(chips=0):
 
 def play_luigi_poker(chips=0):
     # Importing and calling the function to play Luigi Poker
-    from luigi_poker.luigi_poker import play_luigi_poker
-    return play_luigi_poker(chips)
+    from luigi_poker.luigi_poker import play_luigi_poker as plp
+    return plp(chips)
 
 def main_menu(chips=0):
     clear_screen()

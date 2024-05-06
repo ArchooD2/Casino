@@ -200,7 +200,6 @@ def play_luigi_poker(chips=0):
             print("It's a tie!")
         print(f"You now have {player_chips} Copper.\n")
         input("Press enter to continue...")
-        return player_chips
 
 # Play the game
 if __name__ == "__main__":
