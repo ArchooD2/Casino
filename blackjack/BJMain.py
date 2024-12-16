@@ -1,6 +1,9 @@
 from asciicards import show_card, show_hand, create_deck
-import math
-import os
+import math,os,random
+
+# Global shoe to persist across games
+shoe = []
+discard_pile = []
 
 def cls():
     os.system("cls")
@@ -12,17 +15,34 @@ def get_score(hand):
         if card["Rank"] == "A":
             num_aces += 1
         score += card["Value"]
-    if score == 11 and num_aces == 1:
-        return 21
-    while score < 11 and num_aces > 0:
+    while score <= 11 and num_aces > 0:
         score += 10
         num_aces -= 1
     return score
 
+def reshuffle_shoe():
+    """Create a new 6-deck shoe and shuffle"""
+    global shoe
+    shoe = create_deck(6)
+    random.shuffle(shoe)
+
+def deal_card():
+    """Deal a card from the shoe, reshuffling if necessary"""
+    global shoe
+    if len(shoe) == 0:  # If the shoe is empty, reshuffle
+        reshuffle_shoe()
+    return shoe.pop()
+
 def play_bj(chips=0):
     os.system("color 2")
     print("Welcome to Blackjack with ASCII Art Cards!")
+    global shoe
     player_chips = chips if chips else 100
+
+    # Initialize the shoe if it's empty
+    if len(shoe) == 0:
+        reshuffle_shoe()
+
     while True:
         print(f"You have {player_chips} Copper.")
         if player_chips == 0:
@@ -40,14 +60,20 @@ def play_bj(chips=0):
                 bet = 0
         if bet == 0:
             break
-        deck = create_deck()
-        player_hand = [deck.pop(), deck.pop()]
-        dealer_hand = [deck.pop(), deck.pop()]
-        showncard = dealer_hand[0]
-        print(f"\nDealer's Hand:\n{show_card(showncard)}\n\nYour Hand:\n{show_hand(player_hand)}\nYour Hand's Value:{get_score(player_hand)}")
+
+        # Deal initial hands
+        player_hand = [deal_card(), deal_card()]
+        dealer_hand = [deal_card(), deal_card()]
+        shown_card = dealer_hand[0]
+
+        print(f"\nDealer's Hand:\n{show_card(shown_card)}")
+        print(f"\nYour Hand:\n{show_hand(player_hand)}")
+        print(f"Your Hand's Value: {get_score(player_hand)}")
+
         while True:
             player_score = get_score(player_hand)
             dealer_score = get_score(dealer_hand)
+
             if player_score > 21:
                 print("Bust! Dealer wins.")
                 player_chips -= bet
@@ -55,34 +81,26 @@ def play_bj(chips=0):
             elif player_score == 21:
                 if len(player_hand) == 2:
                     print("BlackJack! You Win!!")
-                    player_chips += math.floor(bet*1.5)
+                    player_chips += math.floor(bet * 1.5)
                     break
                 print("21! You win!")
                 player_chips += bet
                 break
-            choice = input("Hit or stand? ")
-            if choice.lower() == "hit":
-                # Try to deal with IndexError
-                try:
-                    player_hand.append(deck.pop())
-                    print(f"\nDealer's Hand:\n{show_card(dealer_hand[0])}\n\nYour Hand:\n{show_hand(player_hand)}\n\nYour Hand's Value:{get_score(player_hand)}")
-                except IndexError as e:
-                    print(f"Error: Deck is empty. Report this: \ndealer_hand:{dealer_hand}\nplayer_hand:{player_hand}\n{e}")
-                    break
+
+            choice = input("Hit or stand? ").lower()
+            if choice == "hit":
+                player_hand.append(deal_card())
+                print(f"\nYour Hand:\n{show_hand(player_hand)}")
+                print(f"Your Hand's Value: {get_score(player_hand)}")
             else:
-                while dealer_score < 17 or (dealer_score >= 17 and dealer_score == (sum(card["Value"] for card in dealer_hand) + 10)) or (dealer_score == 21 and any(card["Rank"] == "A" for card in dealer_hand) and any(card["Value"] == "10" for card in dealer_hand) and len(dealer_hand) == 2): #some bullshit
-                    # Try to deal with IndexError
-                    try:
-                        dealer_hand.append(deck.pop())
-                        dealer_score = get_score(dealer_hand)
-                    except IndexError as e:
-                        print(f"Error: Deck is empty. Report this: \ndealer_hand:{dealer_hand}\nplayer_hand:{player_hand}\n{e}")
-                        break
-                print(f"\nDealer's Hand:\n{show_hand(dealer_hand)}\nDealer's Hand Value:\n{get_score(dealer_hand)}")
-                if player_score == 21 and len(player_hand) == 2:
-                    print("Blackjack!")
-                    if dealer_score == 21 and len(dealer_hand) == 2:
-                        pass
+                # Dealer logic
+                print(f"\nDealer's Hand:\n{show_hand(dealer_hand)}")
+                while dealer_score < 17:
+                    dealer_hand.append(deal_card())
+                    dealer_score = get_score(dealer_hand)
+                print(f"\nDealer's Final Hand:\n{show_hand(dealer_hand)}")
+                print(f"Dealer's Hand Value: {dealer_score}")
+
                 if dealer_score > 21:
                     print("Dealer busts! You win!")
                     player_chips += bet
@@ -94,9 +112,12 @@ def play_bj(chips=0):
                     player_chips += bet
                 else:
                     print("It's a push!")
-                print(f"You now have {player_chips} Copper.\n")
-                input("Press enter to continue...")
                 break
+
+        print(f"You now have {player_chips} Copper.\n")
+        input("Press enter to continue...")
+    return player_chips
+
 if __name__ == "__main__":
     chips = 100
     while True:
