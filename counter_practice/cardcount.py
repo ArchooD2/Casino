@@ -17,8 +17,8 @@ def card_counting_practice():
     running_count = 0
     cards_drawn = 0
     while len(deck) > 0:
-        # Draw a random number of cards (1-3) to simulate play
-        num_draw = random.randint(1, 3)
+        # Draw a random number of cards (1-11) to simulate play
+        num_draw = random.choices(range(2, 11), weights=[30, 50, 15, 10, 10, 5, 3, 2, 1], k=1)[0]
         drawn_cards = deck[:num_draw]
         deck = deck[num_draw:]
         discard_pile.extend(drawn_cards)

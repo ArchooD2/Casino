@@ -1,5 +1,13 @@
 def getcount(deck):
-    #reverse the counting stats to get the running count (without looking at discarded cards, so inverse)
+    """
+    reverse the counting stats to get the running count (without looking at discarded cards, so inverse)
+    
+    Reverse card values:
+    2–6: -1 
+    7–9: 0 
+    A, 10, J, Q, K +1 
+
+    """
     count = 0
     for card in deck:
         if card["Rank"] in ["10", "J", "Q", "K", "A"]:
